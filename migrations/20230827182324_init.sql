@@ -22,7 +22,7 @@ CREATE TABLE user_team_relation (
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
 );
 
-CREATE TABLE shortcuts (
+CREATE TABLE links (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     url VARCHAR(255) NOT NULL,
@@ -37,4 +37,4 @@ CREATE TABLE shortcuts (
 -- DROP TABLE users;
 -- DROP TABLE teams;
 -- DROP TABLE user_team_relation;
--- DROP TABLE shortcuts;
+-- DROP TABLE links;

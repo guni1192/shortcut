@@ -6,7 +6,7 @@
 
 ## Tables
 
-shortcuts
+links
 
 |name|type|option|
 |:---:|:---:|:---:|
