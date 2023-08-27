@@ -1,0 +1,18 @@
+services:
+  mysql:
+    image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_DATABASE: shortcut
+      MYSQL_USER: shortcut
+      MYSQL_PASSWORD: password
+      BIND-ADDRESS: 0.0.0.0
+    restart: always
+    volumes:
+      - type: bind
+        source: ./db/init
+        target: /docker-entrypoint-initdb.d
+    ports:
+      - 3306:3306
