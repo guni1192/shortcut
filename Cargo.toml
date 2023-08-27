@@ -1,3 +1,5 @@
 [workspace]
-
-members = []
+resolver = "2"
+members = [
+    "shortcut-api"
+]
