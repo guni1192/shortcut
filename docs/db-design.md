@@ -10,7 +10,7 @@ links
 
 |name|type|option|
 |:---:|:---:|:---:|
-|id|string|pk, auto increment|
+|id|bigint|pk, auto increment|
 |key|string|not null, unique|
 |url|string|not null|
 |owner_id|int|not null, fk(users.id)|
@@ -20,7 +20,7 @@ links
 users
 |name|type|option|
 |:---:|:---:|:---:|
-|id|string|pk, auto increment|
+|id|bigint|pk, auto increment|
 |email|string|not null, pk|
 |screen_name|varchar(64)|not null|
 |create_at|timestamp||
@@ -29,9 +29,8 @@ users
 teams
 |name|type|option|
 |:---:|:---:|:---:|
-|id|string|pk, auto increment|
+|id|bigint|pk, auto increment|
 |name|varchar(64)|not null|
-|team_id|string|not null, fk(teams.id)|
 |create_at|timestamp||
 |update_at|timestamp||
 

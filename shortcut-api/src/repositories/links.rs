@@ -51,7 +51,10 @@ impl Repository for ShortcutRepository {
 
         tx.commit().await?;
 
+<<<<<<< Updated upstream
         println!("{:?}", link);
+=======
+>>>>>>> Stashed changes
         Ok(link)
     }
 }
