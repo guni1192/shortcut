@@ -38,6 +38,6 @@ impl MySqlClient {
         let url = self.get_url();
 
         let pool_opts = MySqlPoolOptions::new();
-        Ok(pool_opts.connect(&url).await?)
+        pool_opts.connect(&url).await
     }
 }
