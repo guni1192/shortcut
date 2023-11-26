@@ -17,7 +17,13 @@ graph LR
 
 ## Shortcut API
 
+* Provide short URLs CRUD
+
 ## Shortcut Gateway
+
+* Provide L7 proxy
+  * use Envoy ? or implemented proxy ?
+* `https://shortcut.guni.dev/guni1192` => `https://guni1192.com`
 
 ## Shortcut Client
 
@@ -35,7 +41,7 @@ graph LR
     api-lb[API Load Balancer] --> api2
     api[Shortcut API] --> DB((MySQL))
     api2[Shortcut API] --> DB((MySQL))
-    browser[Browser] --> gateway
+    browser[Browser]-->gateway
     gateway[Shortcut Gateway]-- fetch url --> api-lb
     gateway -- redirect url --> browser
 ```
