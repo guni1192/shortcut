@@ -1,7 +1,7 @@
-use shortcut::shortcut_server::Shortcut;
-use shortcut::Link;
+use proto::shortcut_server::Shortcut;
+use proto::Link;
 
-pub mod shortcut {
+pub mod proto {
     tonic::include_proto!("shortcut");
 }
 
@@ -12,10 +12,10 @@ pub struct ShortcutService {}
 impl Shortcut for ShortcutService {
     async fn create(
         &self,
-        _request: tonic::Request<shortcut::CreateRequest>,
-    ) -> Result<tonic::Response<shortcut::CreateResponse>, tonic::Status> {
+        _request: tonic::Request<proto::CreateRequest>,
+    ) -> Result<tonic::Response<proto::CreateResponse>, tonic::Status> {
         // let request = request.into_inner();
-        Ok(tonic::Response::new(shortcut::CreateResponse {
+        Ok(tonic::Response::new(proto::CreateResponse {
             link: Some(Link {
                 name: "alias".to_string(),
                 url: "url".to_string(),
@@ -27,10 +27,10 @@ impl Shortcut for ShortcutService {
 
     async fn list(
         &self,
-        _request: tonic::Request<shortcut::ListRequest>,
-    ) -> Result<tonic::Response<shortcut::ListResponse>, tonic::Status> {
+        _request: tonic::Request<proto::ListRequest>,
+    ) -> Result<tonic::Response<proto::ListResponse>, tonic::Status> {
         // let request = request.into_inner();
-        Ok(tonic::Response::new(shortcut::ListResponse {
+        Ok(tonic::Response::new(proto::ListResponse {
             links: vec![Link {
                 name: "alias".to_string(),
                 url: "url".to_string(),
@@ -42,10 +42,10 @@ impl Shortcut for ShortcutService {
 
     async fn show(
         &self,
-        _request: tonic::Request<shortcut::ShowRequest>,
-    ) -> Result<tonic::Response<shortcut::ShowResponse>, tonic::Status> {
+        _request: tonic::Request<proto::ShowRequest>,
+    ) -> Result<tonic::Response<proto::ShowResponse>, tonic::Status> {
         // let request = request.into_inner();
-        Ok(tonic::Response::new(shortcut::ShowResponse {
+        Ok(tonic::Response::new(proto::ShowResponse {
             link: Some(Link {
                 name: "alias".to_string(),
                 url: "url".to_string(),
@@ -57,11 +57,11 @@ impl Shortcut for ShortcutService {
 
     async fn update(
         &self,
-        _request: tonic::Request<shortcut::UpdateRequest>,
-    ) -> Result<tonic::Response<shortcut::UpdateResponse>, tonic::Status> {
+        _request: tonic::Request<proto::UpdateRequest>,
+    ) -> Result<tonic::Response<proto::UpdateResponse>, tonic::Status> {
         // let request = request.into_inner();
 
-        Ok(tonic::Response::new(shortcut::UpdateResponse {
+        Ok(tonic::Response::new(proto::UpdateResponse {
             link: Some(Link {
                 name: "alias".to_string(),
                 url: "url".to_string(),
@@ -73,9 +73,9 @@ impl Shortcut for ShortcutService {
 
     async fn delete(
         &self,
-        _request: tonic::Request<shortcut::DeleteRequest>,
-    ) -> Result<tonic::Response<shortcut::DeleteResponse>, tonic::Status> {
+        _request: tonic::Request<proto::DeleteRequest>,
+    ) -> Result<tonic::Response<proto::DeleteResponse>, tonic::Status> {
         // let request = request.into_inner();
-        Ok(tonic::Response::new(shortcut::DeleteResponse {}))
+        Ok(tonic::Response::new(proto::DeleteResponse {}))
     }
 }

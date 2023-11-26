@@ -18,11 +18,14 @@ message Link {
   google.protobuf.Timestamp updated_at = 4;
 }
 
-message CreateRequest { string name = 1; string url = 2; }
+message CreateRequest {
+  string name = 1;
+  string url = 2;
+}
 
 message CreateResponse { Link link = 1; }
 
-message ListRequest { }
+message ListRequest {}
 
 message ListResponse { repeated Link links = 1; }
 
@@ -30,7 +33,10 @@ message ShowRequest { string name = 1; }
 
 message ShowResponse { Link link = 1; }
 
-message UpdateRequest { string name = 1;  string url = 2; }
+message UpdateRequest {
+  string name = 1;
+  string url = 2;
+}
 
 message UpdateResponse { Link link = 1; }
 

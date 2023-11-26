@@ -16,7 +16,7 @@ jobs:
     - name: Install protoc
       run: |
         sudo apt-get update -y
-        sudo apt-get install -y protobuf-compiler libprotobuf-dev
+        sudo apt-get install -y protobuf-compiler libprotobuf-dev clang-format
 
     - name: Check code
       run: cargo check
@@ -25,6 +25,9 @@ jobs:
       run: |
         rustup component add clippy
         cargo clippy -- -D warnings
+
+    - name: Lint protobuf
+      run: clang-format --dry-run --Werror proto/*.proto
 
   test:
     runs-on: ubuntu-latest
