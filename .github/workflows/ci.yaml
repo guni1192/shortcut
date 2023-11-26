@@ -33,11 +33,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+
+    - name: Pull images
+      run: docker compose pull
+
     - name: Build
       run: docker compose build
 
-    - name: Launch API and DB
-      run: docker compose up -d
-
     - name: Run tests
-      run: docker compose run api-test cargo test
+      run: docker compose run api-test

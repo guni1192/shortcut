@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-set -eu
+set -eux
 
 docker compose build
-docker compose up -d
 docker compose run api-test
