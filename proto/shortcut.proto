@@ -4,46 +4,36 @@ package shortcut;
 import "google/protobuf/timestamp.proto";
 
 service Shortcut {
-    rpc Create(CreateLinkRequest) returns (CreateLinkResponse);
-    rpc List(ListLinkRequest) returns (ListLinkResponse);
-    rpc Show(ShowLinkRequest) returns (ShowLinkResponse);
-    rpc UpdateLink(UpdateLinkRequest) returns (UpdateLinkResponse);
-    rpc Delete(UpdateLinkRequest) returns (DeleteLinkResponse);
+  rpc Create(CreateRequest) returns (CreateResponse);
+  rpc List(ListRequest) returns (ListResponse);
+  rpc Show(ShowRequest) returns (ShowResponse);
+  rpc Update(UpdateRequest) returns (UpdateResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
 }
 
 message Link {
-    string name = 1;
-    string url = 2;
-    google.protobuf.Timestamp created_at = 3;
-    google.protobuf.Timestamp updated_at = 4;
+  string name = 1;
+  string url = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
 }
 
-message CreateLinkRequest {
-    Link link = 1;
-}
+message CreateRequest { string name = 1; string url = 2; }
 
-message CreateLinkResponse {
-    Link link = 1;
-}
+message CreateResponse { Link link = 1; }
 
-message ListLinkRequest {}
+message ListRequest { }
 
-message ListLinkResponse {
-    repeated Link links = 1;
-}
+message ListResponse { repeated Link links = 1; }
 
-message ShowLinkRequest {
-    string name = 1;
-}
+message ShowRequest { string name = 1; }
 
-message ShowLinkResponse {
-    Link link = 1;
-}
+message ShowResponse { Link link = 1; }
 
-message UpdateLinkRequest {}
+message UpdateRequest { string name = 1;  string url = 2; }
 
-message UpdateLinkResponse {}
+message UpdateResponse { Link link = 1; }
 
-message DeleteLinkRequest {}
+message DeleteRequest { string name = 1; }
 
-message DeleteLinkResponse {}
+message DeleteResponse {}
