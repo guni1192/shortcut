@@ -1,0 +1,49 @@
+syntax = "proto3";
+package shortcut;
+
+import "google/protobuf/timestamp.proto";
+
+service Shortcut {
+    rpc Create(CreateLinkRequest) returns (CreateLinkResponse);
+    rpc List(ListLinkRequest) returns (ListLinkResponse);
+    rpc Show(ShowLinkRequest) returns (ShowLinkResponse);
+    rpc UpdateLink(UpdateLinkRequest) returns (UpdateLinkResponse);
+    rpc Delete(UpdateLinkRequest) returns (DeleteLinkResponse);
+}
+
+message Link {
+    string name = 1;
+    string url = 2;
+    google.protobuf.Timestamp created_at = 3;
+    google.protobuf.Timestamp updated_at = 4;
+}
+
+message CreateLinkRequest {
+    Link link = 1;
+}
+
+message CreateLinkResponse {
+    Link link = 1;
+}
+
+message ListLinkRequest {}
+
+message ListLinkResponse {
+    repeated Link links = 1;
+}
+
+message ShowLinkRequest {
+    string name = 1;
+}
+
+message ShowLinkResponse {
+    Link link = 1;
+}
+
+message UpdateLinkRequest {}
+
+message UpdateLinkResponse {}
+
+message DeleteLinkRequest {}
+
+message DeleteLinkResponse {}

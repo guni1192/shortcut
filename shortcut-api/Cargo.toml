@@ -10,3 +10,7 @@ anyhow = "1.0.75"
 async-trait = "0.1.73"
 sqlx = { version = "0.7", features = ["runtime-tokio", "tls-rustls", "mysql"] }
 tokio = { version = "1.32.0", features = ["full"] }
+tonic = "0.10.2"
+
+[build-dependencies]
+tonic-build = "0.10.2"
