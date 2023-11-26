@@ -1,3 +1,5 @@
-fn main() {
-    tonic_build::configure().compile(&["../proto/shortcut.proto"], &["../proto"]).unwrap()
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tonic_build::configure()
+        .compile(&["../proto/shortcut.proto"], &["../proto"])?;
+    Ok(())
 }

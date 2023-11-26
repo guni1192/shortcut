@@ -75,6 +75,9 @@ services:
         source: "./shortcut-api/src"
         target: "/app/src"
       - type: bind
+        source: "./shortcut-api/build.rs"
+        target: "/app/build.rs"
+      - type: bind
         source: "./shortcut-api/Cargo.toml"
         target: "/app/Cargo.toml"
     environment:
