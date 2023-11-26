@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: dtolnay/rust-toolchain@stable
+    - name: Install protoc
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y protobuf-compiler libprotobuf-dev
+
+    - name: Check code
+      run: cargo check
+
+    - name: Check code with Clippy
+      run: |
+        rustup component add clippy
+        cargo clippy -- -D warnings
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build
+      run: docker compose build
+
+    - name: Launch API and DB
+      run: docker compose up -d
+
+    - name: Run tests
+      run: docker compose run api-test cargo test
