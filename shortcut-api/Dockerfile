@@ -7,7 +7,7 @@
 ################################################################################
 # Create a stage for building the application.
 
-ARG RUST_VERSION=1.72
+ARG RUST_VERSION=1.73
 ARG APP_NAME=shortcut-api
 FROM rust:${RUST_VERSION}-slim-bookworm AS build
 ARG APP_NAME
