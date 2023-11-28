@@ -12,13 +12,13 @@ pub struct ShortcutService {}
 impl Shortcut for ShortcutService {
     async fn create(
         &self,
-        _request: tonic::Request<proto::CreateRequest>,
+        request: tonic::Request<proto::CreateRequest>,
     ) -> Result<tonic::Response<proto::CreateResponse>, tonic::Status> {
-        // let request = request.into_inner();
+        let request = request.into_inner();
         Ok(tonic::Response::new(proto::CreateResponse {
             link: Some(Link {
-                name: "alias".to_string(),
-                url: "url".to_string(),
+                name: request.name.clone(),
+                url: request.url.clone(),
                 created_at: None,
                 updated_at: None,
             }),
@@ -30,14 +30,7 @@ impl Shortcut for ShortcutService {
         _request: tonic::Request<proto::ListRequest>,
     ) -> Result<tonic::Response<proto::ListResponse>, tonic::Status> {
         // let request = request.into_inner();
-        Ok(tonic::Response::new(proto::ListResponse {
-            links: vec![Link {
-                name: "alias".to_string(),
-                url: "url".to_string(),
-                created_at: None,
-                updated_at: None,
-            }],
-        }))
+        Ok(tonic::Response::new(proto::ListResponse { links: vec![] }))
     }
 
     async fn show(
@@ -57,14 +50,14 @@ impl Shortcut for ShortcutService {
 
     async fn update(
         &self,
-        _request: tonic::Request<proto::UpdateRequest>,
+        request: tonic::Request<proto::UpdateRequest>,
     ) -> Result<tonic::Response<proto::UpdateResponse>, tonic::Status> {
-        // let request = request.into_inner();
+        let request = request.into_inner();
 
         Ok(tonic::Response::new(proto::UpdateResponse {
             link: Some(Link {
-                name: "alias".to_string(),
-                url: "url".to_string(),
+                name: request.name.to_string(),
+                url: request.url.to_string(),
                 created_at: None,
                 updated_at: None,
             }),
