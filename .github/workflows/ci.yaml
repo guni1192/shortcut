@@ -108,8 +108,11 @@ jobs:
     - name: Build
       run: docker compose build
 
-    - name: Run API and DB
-      run: docker compose up -d
+    - id: compose-up
+      name: Run API and DB
+      run: |
+        docker compose up -d
+
 
     - name: DB migration
       run: |
@@ -126,3 +129,18 @@ jobs:
         MYSQL_PASSWORD: password
         MYSQL_HOST: localhost
         MYSQL_PORT: 3306
+
+    - name: dump logs
+      if: failure()
+      run: |
+        mkdir logs
+        docker compose logs > \
+          logs/docker-compose-${{ github.workflow }}-${{ github.run_id }}-${{ github.run_number }}.log
+
+    - name: upload docker compose logs
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: docker-compose-${{ github.workflow }}-${{ github.run_id }}-${{ github.run_number }}.log
+        path: logs/docker-compose-${{ github.workflow }}-${{ github.run_id }}-${{ github.run_number }}.log
+
