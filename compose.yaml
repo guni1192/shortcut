@@ -26,7 +26,7 @@ services:
       MYSQL_USER: shortcut
       MYSQL_PASSWORD: password
       BIND-ADDRESS: 0.0.0.0
-    restart: always
+    restart: on-failure
     volumes:
       - type: bind
         source: ./db/init
@@ -35,59 +35,13 @@ services:
       - 3306:3306
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword"]
-      interval: 30s
-      timeout: 5s
+      interval: 5s
+      timeout: 20s
       retries: 10
-      start_period: 10s
 
-  init-db:
-    image: rust:1.73-slim-bookworm
-    entrypoint: /entrypoint.sh
-    working_dir: /app
-    volumes:
-      - type: bind
-        source: "./migrations/"
-        target: "/app/migrations"
-      - type: bind
-        source: "./shortcut-api/entrypoint.sh"
-        target: "/entrypoint.sh"
-    environment:
-      DATABASE_URL: mysql://shortcut:password@mysql:3306/shortcut
+  wait-for-init-db:
+    image: bash:5.2
+    command: echo hello
     depends_on:
       mysql:
         condition: service_healthy
-
-  # Test environment
-  api-test:
-    build:
-      context: .
-      dockerfile: shortcut-api/Dockerfile
-      target: devel
-    command: cargo test
-    working_dir: /app
-    volumes:
-      - type: bind
-        source: "./shortcut-api/src"
-        target: "/app/shortcut-api/src"
-      - type: bind
-        source: "./shortcut-api/build.rs"
-        target: "/app/shortcut-api/build.rs"
-      - type: bind
-        source: "./shortcut-api/Cargo.toml"
-        target: "/app/shortcut-api/Cargo.toml"
-      - type: bind
-        source: "./Cargo.toml"
-        target: "/app/Cargo.toml"
-      - type: bind
-        read_only: true
-        source: "./proto"
-        target: "/app/proto"
-    environment:
-      MYSQL_DATABASE: shortcut
-      MYSQL_USER: shortcut
-      MYSQL_PASSWORD: password
-      MYSQL_HOST: mysql
-      MYSQL_PORT: 3306
-    depends_on:
-      init-db:
-        condition: service_completed_successfully
