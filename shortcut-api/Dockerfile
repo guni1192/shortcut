@@ -13,6 +13,10 @@ FROM rust:${RUST_VERSION}-slim-bookworm AS build
 ARG APP_NAME
 WORKDIR /app
 
+RUN apt-get update && \
+    apt-get install -y protobuf-compiler && \
+    rm -rf /var/lib/apt/lists/*
+
 # Build the application.
 # Leverage a cache mount to /usr/local/cargo/registry/
 # for downloaded dependencies and a cache mount to /app/target/ for 
@@ -20,8 +24,12 @@ WORKDIR /app
 # Leverage a bind mount to the src directory to avoid having to copy the
 # source code into the container. Once built, copy the executable to an
 # output directory before the cache mounted /app/target is unmounted.
-RUN --mount=type=bind,source=src,target=src \
+RUN --mount=type=bind,source=shortcut-api/src,target=shortcut-api/src \
+    --mount=type=bind,source=shortcut-api/Cargo.toml,target=shortcut-api/Cargo.toml \
+    --mount=type=bind,source=shortcut-api/build.rs,target=shortcut-api/build.rs \
     --mount=type=bind,source=Cargo.toml,target=Cargo.toml \
+    --mount=type=bind,source=Cargo.lock,target=Cargo.lock \
+    --mount=type=bind,source=proto,target=proto \
     --mount=type=cache,target=/app/target/ \
     --mount=type=cache,target=/usr/local/cargo/registry/ \
     <<EOF
@@ -29,6 +37,14 @@ set -e
 cargo build --release
 cp ./target/release/$APP_NAME /bin/server
 EOF
+
+
+################################################################################
+# Develpment stage
+################################################################################
+
+FROM build as devel
+WORKDIR /app
 
 ################################################################################
 # Create a new stage for running the application that contains the minimal
