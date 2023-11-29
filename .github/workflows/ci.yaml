@@ -90,7 +90,7 @@ jobs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
           target/
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-cargo-with-sqlx-${{ hashFiles('**/Cargo.lock') }}
 
     - uses: docker/setup-buildx-action@v2
 
@@ -116,7 +116,7 @@ jobs:
 
     - name: DB migration
       run: |
-        cargo install sqlx-cli --no-default-features --features rustls,mysql
+        which sqlx || cargo install sqlx-cli --no-default-features --features rustls,mysql --no-track
         cargo sqlx migrate run
       env:
         DATABASE_URL: mysql://shortcut:password@localhost:3306/shortcut
