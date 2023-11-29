@@ -9,6 +9,8 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    env:
+      CARGO_INCREMENTAL: 1
     steps:
     - uses: actions/checkout@v4
 
@@ -41,6 +43,8 @@ jobs:
 
   small-test:
     runs-on: ubuntu-latest
+    env:
+      CARGO_INCREMENTAL: 1
     steps:
     - uses: actions/checkout@v4
 
@@ -66,6 +70,8 @@ jobs:
 
   midium-test:
     runs-on: ubuntu-latest
+    env:
+      CARGO_INCREMENTAL: 1
     steps:
     - uses: actions/checkout@v4
 
