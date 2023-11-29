@@ -86,6 +86,15 @@ jobs:
           target/
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
+    - uses: docker/setup-buildx-action@v2
+
+    - uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: shortcut-api/Dockerfile
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
     - name: Pull images
       run: docker compose pull
 
