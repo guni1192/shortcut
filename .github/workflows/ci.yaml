@@ -42,12 +42,19 @@ jobs:
         sudo apt-get install -y protobuf-compiler libprotobuf-dev
 
     - name: Running small tests
-      run: cargo test --all-features
+      run: cargo test --all-features --bins --lib
 
   midium-test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+
+    - uses: dtolnay/rust-toolchain@stable
+
+    - name: Install protoc
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y protobuf-compiler libprotobuf-dev
 
     - name: Pull images
       run: docker compose pull
@@ -55,8 +62,14 @@ jobs:
     - name: Build
       run: docker compose build
 
-    - name: Run tests
+    - name: Run API and DB
       run: docker compose up -d
 
     - name: Run medium tests
       run: cargo test --tests
+      env:
+        MYSQL_DATABASE: shortcut
+        MYSQL_USER: shortcut
+        MYSQL_PASSWORD: password
+        MYSQL_HOST: localhost
+        MYSQL_PORT: 3306

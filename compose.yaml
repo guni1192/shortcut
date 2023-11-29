@@ -57,37 +57,9 @@ services:
       mysql:
         condition: service_healthy
 
-  # Test environment
-  api-test:
-    build:
-      context: .
-      dockerfile: shortcut-api/Dockerfile
-      target: devel
+  wait-for-init-db:
+    image: bash:5.2
     command: cargo test
-    working_dir: /app
-    volumes:
-      - type: bind
-        source: "./shortcut-api/src"
-        target: "/app/shortcut-api/src"
-      - type: bind
-        source: "./shortcut-api/build.rs"
-        target: "/app/shortcut-api/build.rs"
-      - type: bind
-        source: "./shortcut-api/Cargo.toml"
-        target: "/app/shortcut-api/Cargo.toml"
-      - type: bind
-        source: "./Cargo.toml"
-        target: "/app/Cargo.toml"
-      - type: bind
-        read_only: true
-        source: "./proto"
-        target: "/app/proto"
-    environment:
-      MYSQL_DATABASE: shortcut
-      MYSQL_USER: shortcut
-      MYSQL_PASSWORD: password
-      MYSQL_HOST: mysql
-      MYSQL_PORT: 3306
     depends_on:
       init-db:
         condition: service_completed_successfully
