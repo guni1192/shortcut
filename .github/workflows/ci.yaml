@@ -110,6 +110,13 @@ jobs:
     - name: Run API and DB
       run: docker compose up -d
 
+    - name: DB migration
+      run: |
+        cargo install sqlx-cli --no-default-features --features rustls,mysql
+        cargo sqlx migrate run
+      env:
+        DATABASE_URL: mysql://shortcut:password@localhost:3306/shortcut
+
     - name: Run medium tests
       run: cargo test --tests
       env:

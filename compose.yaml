@@ -40,26 +40,9 @@ services:
       retries: 10
       start_period: 10s
 
-  init-db:
-    image: rust:1.73-slim-bookworm
-    entrypoint: /entrypoint.sh
-    working_dir: /app
-    volumes:
-      - type: bind
-        source: "./migrations/"
-        target: "/app/migrations"
-      - type: bind
-        source: "./shortcut-api/entrypoint.sh"
-        target: "/entrypoint.sh"
-    environment:
-      DATABASE_URL: mysql://shortcut:password@mysql:3306/shortcut
+  wait-for-init-db:
+    image: bash:5.2
+    command: echo hello
     depends_on:
       mysql:
         condition: service_healthy
-
-  wait-for-init-db:
-    image: bash:5.2
-    command: cargo test
-    depends_on:
-      init-db:
-        condition: service_completed_successfully
