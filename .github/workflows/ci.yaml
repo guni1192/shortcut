@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CARGO_INCREMENTAL: 1
+      SQLX_OFFLINE: true
     steps:
     - uses: actions/checkout@v4
 
@@ -45,6 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CARGO_INCREMENTAL: 1
+      SQLX_OFFLINE: true
     steps:
     - uses: actions/checkout@v4
 
@@ -72,6 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CARGO_INCREMENTAL: 1
+      DATABASE_URL: postgres://shortcut:password@localhost:5432/shortcut
     steps:
     - uses: actions/checkout@v4
 
@@ -113,16 +116,8 @@ jobs:
 
     - name: DB migration
       run: |
-        cargo install sqlx-cli --no-default-features --features rustls,mysql
+        cargo install sqlx-cli --no-default-features --features rustls,postgres
         cargo sqlx migrate run
-      env:
-        DATABASE_URL: mysql://shortcut:password@localhost:3306/shortcut
 
     - name: Run medium tests
       run: cargo test --tests
-      env:
-        MYSQL_DATABASE: shortcut
-        MYSQL_USER: shortcut
-        MYSQL_PASSWORD: password
-        MYSQL_HOST: localhost
-        MYSQL_PORT: 3306

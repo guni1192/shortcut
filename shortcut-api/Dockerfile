@@ -30,6 +30,7 @@ RUN --mount=type=bind,source=shortcut-api/src,target=shortcut-api/src \
     --mount=type=bind,source=Cargo.toml,target=Cargo.toml \
     --mount=type=bind,source=Cargo.lock,target=Cargo.lock \
     --mount=type=bind,source=proto,target=proto \
+    --mount=type=bind,source=.sqlx,target=.sqlx \
     --mount=type=cache,target=/app/target/ \
     --mount=type=cache,target=/usr/local/cargo/registry/ \
     <<EOF
