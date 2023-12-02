@@ -1,5 +1,6 @@
 use async_trait::async_trait;
-use sqlx::{types::Uuid, Pool, Postgres};
+use sqlx::{Pool, Postgres};
+use sqlx::types::{chrono, Uuid};
 
 #[derive(Debug, sqlx::FromRow)]
 pub struct Link {
@@ -8,8 +9,8 @@ pub struct Link {
     /// name: URL short name
     pub name: String,
     pub url: String,
-    pub created_at: sqlx::types::chrono::DateTime<chrono::Utc>,
-    pub updated_at: sqlx::types::chrono::DateTime<chrono::Utc>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub updated_at: chrono::DateTime<chrono::Utc>,
     pub user_id: Option<Uuid>,
     pub team_id: Option<Uuid>,
 }
@@ -42,8 +43,6 @@ impl Repository for ShortcutRepository {
     async fn insert_link(&self, name: &str, url: &str) -> Result<Link, sqlx::Error> {
         let mut tx = self.pool.begin().await?;
 
-        dbg!("inserting...");
-
         let row = sqlx::query!(
             "INSERT INTO links (name, url) VALUES ($1, $2) RETURNING id",
             name,
@@ -52,13 +51,9 @@ impl Repository for ShortcutRepository {
         .fetch_one(&mut *tx)
         .await?;
 
-        dbg!("insert success");
-
         let link = sqlx::query_as!(Link, "SELECT * FROM links WHERE id = $1", row.id)
             .fetch_one(&mut *tx)
             .await?;
-
-        dbg!("select success");
 
         tx.commit().await?;
 

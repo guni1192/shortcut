@@ -9,7 +9,6 @@ build = "build.rs"
 [dependencies]
 anyhow = "1.0.75"
 async-trait = "0.1.73"
-chrono = "0.4.31"
 clap = { version = "4.4.10", features = ["derive"] }
 prost = "0.12.3"
 prost-types = "0.12.3"
