@@ -1,4 +1,4 @@
-use shortcut_api::repositories::MySqlClient;
+use shortcut_api::middlewares::db::postgres::pg_connect;
 use shortcut_api::repositories::links::Repository;
 use shortcut_api::repositories::links::ShortcutRepository;
 
@@ -9,13 +9,17 @@ async fn setup_link_data(repository: &ShortcutRepository) -> Result<(), sqlx::Er
     Ok(())
 }
 
+lazy_static::lazy_static! {
+    static ref DATABASE_URL: String = std::env::var("DATABASE_URL").unwrap();
+}
+
 #[tokio::test]
 pub async fn test_get_link_by_name() -> Result<(), anyhow::Error> {
-    let pool = MySqlClient::from_env().connect().await?;
+    let pool = pg_connect(&DATABASE_URL).await?;
     let repository = ShortcutRepository::new(pool);
     setup_link_data(&repository).await?;
 
-    let link = repository.get_link_by_name("guni").await.unwrap();
+    let link = repository.get_link_by_name("guni").await?;
 
     assert_eq!(link.name, "guni".to_string());
     assert_eq!(link.url, "https://guni1192.com".to_string());
@@ -24,7 +28,7 @@ pub async fn test_get_link_by_name() -> Result<(), anyhow::Error> {
 
 #[tokio::test]
 pub async fn test_get_link_by_name_not_found() -> Result<(), anyhow::Error> {
-    let pool = MySqlClient::from_env().connect().await?;
+    let pool = pg_connect(&DATABASE_URL).await?;
     let repository = ShortcutRepository::new(pool);
     setup_link_data(&repository).await?;
 

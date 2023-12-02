@@ -9,11 +9,16 @@ build = "build.rs"
 [dependencies]
 anyhow = "1.0.75"
 async-trait = "0.1.73"
+chrono = "0.4.31"
+clap = { version = "4.4.10", features = ["derive"] }
 prost = "0.12.3"
 prost-types = "0.12.3"
-sqlx = { version = "0.7", features = ["runtime-tokio", "tls-rustls", "mysql"] }
+sqlx = { version = "0.7", features = ["runtime-tokio", "tls-rustls", "postgres", "uuid", "chrono"] }
 tokio = { version = "1.32.0", features = ["full"] }
 tonic = { version = "0.10.2", features = ["prost"] }
 
 [build-dependencies]
 tonic-build = "0.10.2"
+
+[dev-dependencies]
+lazy_static = "1.4.0"
