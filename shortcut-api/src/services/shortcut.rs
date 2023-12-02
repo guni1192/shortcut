@@ -39,12 +39,12 @@ impl Shortcut for ShortcutService {
             .await
             .map_err(|e| tonic::Status::internal(format!("failed to create link: {:?}", e)))?;
 
-
         let created_at = to_prost_timestamp(link.created_at);
         let updated_at = to_prost_timestamp(link.updated_at);
 
         Ok(tonic::Response::new(proto::CreateResponse {
             link: Some(Link {
+                id: link.id.to_string(),
                 name: link.name,
                 url: link.url,
                 created_at: Some(created_at),
@@ -68,6 +68,7 @@ impl Shortcut for ShortcutService {
         // let request = request.into_inner();
         Ok(tonic::Response::new(proto::ShowResponse {
             link: Some(Link {
+                id: "".to_string(),
                 name: "alias".to_string(),
                 url: "url".to_string(),
                 created_at: None,
@@ -84,6 +85,7 @@ impl Shortcut for ShortcutService {
 
         Ok(tonic::Response::new(proto::UpdateResponse {
             link: Some(Link {
+                id: "".to_string(),
                 name: request.name.to_string(),
                 url: request.url.to_string(),
                 created_at: None,

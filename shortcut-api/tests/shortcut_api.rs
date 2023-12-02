@@ -15,6 +15,7 @@ async fn test_shortcut_create() -> Result<(), Box<dyn std::error::Error>> {
     let link = response.link.clone().expect("Shortcut::Create has no link");
 
     dbg!(&link);
+    assert_eq!(link.id.len(), 36);
     assert_eq!(link.url, "https://guni1192.com".to_string());
     assert_eq!(link.name, "guni".to_string());
     assert!(link.created_at.is_some());
