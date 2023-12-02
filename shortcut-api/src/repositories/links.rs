@@ -16,31 +16,31 @@ pub struct Link {
 }
 
 #[async_trait]
-pub trait Repository {
-    async fn get_link_by_name(&self, name: &str) -> Result<Link, sqlx::Error>;
-    async fn insert_link(&self, name: &str, url: &str) -> Result<Link, sqlx::Error>;
+pub trait LinkRepository {
+    async fn get_by_name(&self, name: &str) -> Result<Link, sqlx::Error>;
+    async fn create(&self, name: &str, url: &str) -> Result<Link, sqlx::Error>;
 }
 
-pub struct ShortcutRepository {
+pub struct ScLinkRepository {
     pool: Pool<Postgres>,
 }
 
-impl ShortcutRepository {
+impl ScLinkRepository{
     pub fn new(pool: Pool<Postgres>) -> Self {
         Self { pool }
     }
 }
 
 #[async_trait]
-impl Repository for ShortcutRepository {
-    async fn get_link_by_name(&self, name: &str) -> Result<Link, sqlx::Error> {
+impl LinkRepository for ScLinkRepository {
+    async fn get_by_name(&self, name: &str) -> Result<Link, sqlx::Error> {
         let link = sqlx::query_as!(Link, "SELECT * FROM links WHERE name = $1", name)
             .fetch_one(&self.pool)
             .await?;
         Ok(link)
     }
 
-    async fn insert_link(&self, name: &str, url: &str) -> Result<Link, sqlx::Error> {
+    async fn create(&self, name: &str, url: &str) -> Result<Link, sqlx::Error> {
         let mut tx = self.pool.begin().await?;
 
         let row = sqlx::query!(

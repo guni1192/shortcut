@@ -1,12 +1,30 @@
 use proto::shortcut_server::Shortcut;
 use proto::Link;
+use sqlx::types::{chrono};
+use prost_types::Timestamp;
+
+use crate::repositories::links::{LinkRepository, ScLinkRepository};
 
 pub mod proto {
     tonic::include_proto!("shortcut");
 }
 
-#[derive(Default)]
-pub struct ShortcutService {}
+pub struct ShortcutService {
+    repository: ScLinkRepository,
+}
+
+impl ShortcutService {
+    pub fn new(repository: ScLinkRepository) -> Self {
+        Self { repository }
+    }
+}
+
+fn to_prost_timestamp(datetime: chrono::DateTime<chrono::Utc>) -> Timestamp {
+    Timestamp {
+        seconds: datetime.timestamp(),
+        nanos: datetime.timestamp_subsec_nanos() as i32,
+    }
+}
 
 #[tonic::async_trait]
 impl Shortcut for ShortcutService {
@@ -15,12 +33,22 @@ impl Shortcut for ShortcutService {
         request: tonic::Request<proto::CreateRequest>,
     ) -> Result<tonic::Response<proto::CreateResponse>, tonic::Status> {
         let request = request.into_inner();
+
+        let link = self.repository
+            .create(&request.name, &request.url)
+            .await
+            .map_err(|e| tonic::Status::internal(format!("failed to create link: {:?}", e)))?;
+
+
+        let created_at = to_prost_timestamp(link.created_at);
+        let updated_at = to_prost_timestamp(link.updated_at);
+
         Ok(tonic::Response::new(proto::CreateResponse {
             link: Some(Link {
-                name: request.name.clone(),
-                url: request.url.clone(),
-                created_at: None,
-                updated_at: None,
+                name: link.name,
+                url: link.url,
+                created_at: Some(created_at),
+                updated_at: Some(updated_at),
             }),
         }))
     }
