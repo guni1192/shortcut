@@ -11,6 +11,5 @@ pub struct Cli {
 
     /// The database URL (e.g. postgres://user:pass@localhost:5432/dbname)
     #[arg(short, long, env = "DATABASE_URL")]
-    pub database_url: String
+    pub database_url: String,
 }
-

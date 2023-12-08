@@ -1,7 +1,7 @@
+use prost_types::Timestamp;
 use proto::shortcut_server::Shortcut;
 use proto::Link;
-use sqlx::types::{chrono};
-use prost_types::Timestamp;
+use sqlx::types::chrono;
 
 use crate::repositories::links::{LinkRepository, ScLinkRepository};
 
@@ -34,7 +34,8 @@ impl Shortcut for ShortcutService {
     ) -> Result<tonic::Response<proto::CreateResponse>, tonic::Status> {
         let request = request.into_inner();
 
-        let link = self.repository
+        let link = self
+            .repository
             .create(&request.name, &request.url)
             .await
             .map_err(|e| tonic::Status::internal(format!("failed to create link: {:?}", e)))?;

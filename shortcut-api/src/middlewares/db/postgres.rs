@@ -1,4 +1,4 @@
-use sqlx::{postgres::PgPoolOptions, Postgres, Pool};
+use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 
 pub async fn pg_connect(database_url: &str) -> Result<Pool<Postgres>, sqlx::Error> {
     let pool_opts = PgPoolOptions::new();

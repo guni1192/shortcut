@@ -4,7 +4,7 @@ use shortcut_api::services::shortcut::proto::{shortcut_client::ShortcutClient, C
 async fn test_shortcut_create() -> Result<(), Box<dyn std::error::Error>> {
     let mut client = ShortcutClient::connect("http://localhost:1192").await?;
 
-    let request = tonic::Request::new(CreateRequest{
+    let request = tonic::Request::new(CreateRequest {
         url: "https://guni1192.com".into(),
         name: "guni".into(),
     });
