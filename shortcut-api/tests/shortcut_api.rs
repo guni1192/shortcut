@@ -21,5 +21,12 @@ async fn test_shortcut_create() -> Result<(), Box<dyn std::error::Error>> {
     assert!(link.created_at.is_some());
     assert!(link.updated_at.is_some());
 
+    // twice create should return error
+    let request = tonic::Request::new(CreateRequest {
+        url: "https://guni1192.com".into(),
+        name: "guni".into(),
+    });
+    let response = client.create(request).await?;
+
     Ok(())
 }

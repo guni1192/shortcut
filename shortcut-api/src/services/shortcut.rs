@@ -1,7 +1,7 @@
 use prost_types::Timestamp;
 use proto::shortcut_server::Shortcut;
 use proto::Link;
-use sqlx::types::chrono;
+use sqlx::{types::chrono, Error::Database};
 
 use crate::repositories::links::{LinkRepository, ScLinkRepository};
 
@@ -38,7 +38,12 @@ impl Shortcut for ShortcutService {
             .repository
             .create(&request.name, &request.url)
             .await
-            .map_err(|e| tonic::Status::internal(format!("failed to create link: {:?}", e)))?;
+            .map_err(|e| match e {
+                Database(pg_err) if pg_err.kind() == sqlx::error::ErrorKind::UniqueViolation => {
+                    tonic::Status::already_exists(format!("link name \"{}\" already exists", request.name))
+                }
+                e => tonic::Status::internal(format!("failed to create link: {:?}", e)),
+            })?;
 
         let created_at = to_prost_timestamp(link.created_at);
         let updated_at = to_prost_timestamp(link.updated_at);
