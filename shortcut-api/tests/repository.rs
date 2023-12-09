@@ -34,6 +34,20 @@ pub async fn test_get_link_by_name(pool: PgPool) -> Result<(), anyhow::Error> {
 }
 
 #[sqlx::test]
+pub async fn test_link_list(pool: PgPool) -> Result<(), anyhow::Error> {
+    let repository = ScLinkRepository::new(pool);
+    repository
+        .create("guni", "https://guni1192.com")
+        .await
+        .expect("failed to create link");
+
+    let links: Vec<Link> = repository.list().await?;
+
+    assert!(!links.is_empty());
+    Ok(())
+}
+
+#[sqlx::test]
 pub async fn test_get_link_by_name_not_found(pool: PgPool) -> Result<(), anyhow::Error> {
     let repository = ScLinkRepository::new(pool);
 
