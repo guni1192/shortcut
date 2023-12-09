@@ -12,10 +12,11 @@ service Shortcut {
 }
 
 message Link {
-  string name = 1;
-  string url = 2;
-  google.protobuf.Timestamp created_at = 3;
-  google.protobuf.Timestamp updated_at = 4;
+  string id = 1;
+  string name = 2;
+  string url = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
 }
 
 message CreateRequest {

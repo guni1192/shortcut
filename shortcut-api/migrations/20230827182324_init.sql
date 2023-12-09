@@ -24,7 +24,7 @@ CREATE TABLE user_team_relation (
 
 CREATE TABLE links (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL UNIQUE,
     url VARCHAR(255) NOT NULL,
     user_id UUID,
     team_id UUID,

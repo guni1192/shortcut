@@ -93,7 +93,7 @@ jobs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
           target/
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-cargo-with-db-${{ hashFiles('**/Cargo.lock') }}
 
     - uses: docker/setup-buildx-action@v2
 
@@ -115,9 +115,11 @@ jobs:
       run: docker compose up -d
 
     - name: DB migration
+      working-directory: shortcut-api/
       run: |
         cargo install sqlx-cli --no-default-features --features rustls,postgres
         cargo sqlx migrate run
 
     - name: Run medium tests
+      working-directory: shortcut-api/
       run: cargo test --tests

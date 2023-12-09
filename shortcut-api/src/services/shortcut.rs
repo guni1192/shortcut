@@ -1,26 +1,68 @@
+use prost_types::Timestamp;
 use proto::shortcut_server::Shortcut;
 use proto::Link;
+use sqlx::{types::chrono, Error::Database};
+use tracing::{info, warn};
+
+use crate::repositories::links::{LinkRepository, ScLinkRepository};
 
 pub mod proto {
     tonic::include_proto!("shortcut");
 }
 
-#[derive(Default)]
-pub struct ShortcutService {}
+#[derive(Debug)]
+pub struct ShortcutService {
+    repository: ScLinkRepository,
+}
+
+impl ShortcutService {
+    pub fn new(repository: ScLinkRepository) -> Self {
+        Self { repository }
+    }
+}
+
+fn to_prost_timestamp(datetime: chrono::DateTime<chrono::Utc>) -> Timestamp {
+    Timestamp {
+        seconds: datetime.timestamp(),
+        nanos: datetime.timestamp_subsec_nanos() as i32,
+    }
+}
 
 #[tonic::async_trait]
 impl Shortcut for ShortcutService {
+    #[tracing::instrument(skip(self, request))]
     async fn create(
         &self,
         request: tonic::Request<proto::CreateRequest>,
     ) -> Result<tonic::Response<proto::CreateResponse>, tonic::Status> {
         let request = request.into_inner();
+
+        let link = self
+            .repository
+            .create(&request.name, &request.url)
+            .await
+            .map_err(|e| match e {
+                Database(pg_err) if pg_err.kind() == sqlx::error::ErrorKind::UniqueViolation => {
+                    tonic::Status::already_exists(format!("link name \"{}\" already exists", request.name))
+                }
+                e => {
+                    warn!("failed to create link: {:?}, request: {:?}", e, request);
+                    tonic::Status::internal(format!("failed to create link: {:?}", e))
+                },
+            })?;
+
+        info!("Shortcut::Create: {:?}", link);
+
+        let created_at = to_prost_timestamp(link.created_at);
+        let updated_at = to_prost_timestamp(link.updated_at);
+
         Ok(tonic::Response::new(proto::CreateResponse {
             link: Some(Link {
-                name: request.name.clone(),
-                url: request.url.clone(),
-                created_at: None,
-                updated_at: None,
+                id: link.id.to_string(),
+                name: link.name,
+                url: link.url,
+                created_at: Some(created_at),
+                updated_at: Some(updated_at),
             }),
         }))
     }
@@ -40,6 +82,7 @@ impl Shortcut for ShortcutService {
         // let request = request.into_inner();
         Ok(tonic::Response::new(proto::ShowResponse {
             link: Some(Link {
+                id: "".to_string(),
                 name: "alias".to_string(),
                 url: "url".to_string(),
                 created_at: None,
@@ -56,6 +99,7 @@ impl Shortcut for ShortcutService {
 
         Ok(tonic::Response::new(proto::UpdateResponse {
             link: Some(Link {
+                id: "".to_string(),
                 name: request.name.to_string(),
                 url: request.url.to_string(),
                 created_at: None,
