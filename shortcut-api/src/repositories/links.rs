@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use sqlx::types::{chrono, Uuid};
 use sqlx::{Acquire, PgPool, Pool, Postgres};
+use tracing::debug;
 
 #[derive(Debug, sqlx::FromRow, Default)]
 pub struct Link {
@@ -21,6 +22,7 @@ pub trait LinkRepository {
     async fn create(&self, name: &str, url: &str) -> Result<Link, sqlx::Error>;
 }
 
+#[derive(Debug)]
 pub struct ScLinkRepository {
     pool: PgPool,
 }
@@ -63,7 +65,6 @@ impl InternalLinkRepository {
         A: Acquire<'a, Database = Postgres> + 'a,
     {
         let mut conn = conn.acquire().await?;
-        println!("pre insert: name: {name}, url: {url}");
         let row = sqlx::query!(
             "INSERT INTO links (name, url) VALUES ($1, $2) RETURNING id",
             name,
@@ -72,7 +73,7 @@ impl InternalLinkRepository {
         .fetch_one(&mut *conn)
         .await?;
 
-        println!("row: {:?}", row);
+        debug!("created link: {{ name: {name}, url: {url} }}");
 
         let link = sqlx::query_as!(Link, "SELECT * FROM links WHERE id = $1", row.id)
             .fetch_one(&mut *conn)

@@ -2,6 +2,7 @@ use prost_types::Timestamp;
 use proto::shortcut_server::Shortcut;
 use proto::Link;
 use sqlx::{types::chrono, Error::Database};
+use tracing::{info, warn};
 
 use crate::repositories::links::{LinkRepository, ScLinkRepository};
 
@@ -9,6 +10,7 @@ pub mod proto {
     tonic::include_proto!("shortcut");
 }
 
+#[derive(Debug)]
 pub struct ShortcutService {
     repository: ScLinkRepository,
 }
@@ -28,6 +30,7 @@ fn to_prost_timestamp(datetime: chrono::DateTime<chrono::Utc>) -> Timestamp {
 
 #[tonic::async_trait]
 impl Shortcut for ShortcutService {
+    #[tracing::instrument(skip(self, request))]
     async fn create(
         &self,
         request: tonic::Request<proto::CreateRequest>,
@@ -42,8 +45,13 @@ impl Shortcut for ShortcutService {
                 Database(pg_err) if pg_err.kind() == sqlx::error::ErrorKind::UniqueViolation => {
                     tonic::Status::already_exists(format!("link name \"{}\" already exists", request.name))
                 }
-                e => tonic::Status::internal(format!("failed to create link: {:?}", e)),
+                e => {
+                    warn!("failed to create link: {:?}, request: {:?}", e, request);
+                    tonic::Status::internal(format!("failed to create link: {:?}", e))
+                },
             })?;
+
+        info!("Shortcut::Create: {:?}", link);
 
         let created_at = to_prost_timestamp(link.created_at);
         let updated_at = to_prost_timestamp(link.updated_at);

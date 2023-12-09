@@ -26,6 +26,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     info!("Starting server at {}", addr);
     Server::builder()
+        .trace_fn(|_| tracing::info_span!("shortcut_api_server"))
         .add_service(ShortcutServer::new(shortcut))
         .serve(addr)
         .await?;
