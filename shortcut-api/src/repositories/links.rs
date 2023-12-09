@@ -19,6 +19,7 @@ pub struct Link {
 #[async_trait]
 pub trait LinkRepository {
     async fn find_by_name(&self, name: &str) -> Result<Link, sqlx::Error>;
+    async fn list(&self) -> Result<Vec<Link>, sqlx::Error>;
     async fn create(&self, name: &str, url: &str) -> Result<Link, sqlx::Error>;
 }
 
@@ -40,6 +41,11 @@ impl LinkRepository for ScLinkRepository {
         Ok(link)
     }
 
+    async fn list(&self) -> Result<Vec<Link>, sqlx::Error> {
+        let links = InternalLinkRepository::list(&self.pool).await?;
+        Ok(links)
+    }
+
     async fn create(&self, name: &str, url: &str) -> Result<Link, sqlx::Error> {
         let link = InternalLinkRepository::create(name, url, &self.pool).await?;
         Ok(link)
@@ -58,6 +64,17 @@ impl InternalLinkRepository {
             .fetch_one(&mut *conn)
             .await?;
         Ok(link)
+    }
+
+    pub async fn list<'a, A>(conn: A) -> Result<Vec<Link>, sqlx::Error>
+    where
+        A: Acquire<'a, Database = Postgres> + 'a,
+    {
+        let mut conn = conn.acquire().await?;
+        let links = sqlx::query_as!(Link, "SELECT * FROM links")
+            .fetch_all(&mut *conn)
+            .await?;
+        Ok(links)
     }
 
     pub async fn create<'a, A>(name: &str, url: &str, conn: A) -> Result<Link, sqlx::Error>

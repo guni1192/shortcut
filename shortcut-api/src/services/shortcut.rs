@@ -71,8 +71,25 @@ impl Shortcut for ShortcutService {
         &self,
         _request: tonic::Request<proto::ListRequest>,
     ) -> Result<tonic::Response<proto::ListResponse>, tonic::Status> {
-        // let request = request.into_inner();
-        Ok(tonic::Response::new(proto::ListResponse { links: vec![] }))
+        let links = self.repository.list().await.map_err(|e| {
+            warn!("failed to list links: {:?}", e);
+            tonic::Status::internal(format!("failed to list links: {:?}", e))
+        })?;
+
+        let links: Vec<Link> = links.iter().map(|link| {
+            let created_at = to_prost_timestamp(link.created_at);
+            let updated_at = to_prost_timestamp(link.updated_at);
+
+            Link {
+                id: link.id.to_string(),
+                name: link.name.clone(),
+                url: link.url.clone(),
+                created_at: Some(created_at),
+                updated_at: Some(updated_at),
+            }
+        }).collect();
+
+        Ok(tonic::Response::new(proto::ListResponse { links }))
     }
 
     async fn show(

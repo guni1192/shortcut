@@ -117,7 +117,7 @@ jobs:
     - name: DB migration
       working-directory: shortcut-api/
       run: |
-        cargo install sqlx-cli --no-default-features --features rustls,postgres
+        cargo install sqlx-cli --no-default-features --features rustls,postgres --force
         cargo sqlx migrate run
 
     - name: Run medium tests
