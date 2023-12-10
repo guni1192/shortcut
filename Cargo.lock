@@ -1775,7 +1775,9 @@ dependencies = [
  "clap",
  "hyper 1.0.1",
  "hyper-util",
+ "shortcut-api",
  "tokio",
+ "tonic",
  "tracing",
  "tracing-subscriber",
 ]
