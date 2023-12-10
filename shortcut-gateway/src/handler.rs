@@ -50,7 +50,7 @@ pub async fn redirect(
     let response = response.into_inner();
 
     let not_found = (
-        StatusCode::INTERNAL_SERVER_ERROR,
+        StatusCode::NOT_FOUND,
         format!("Link not found: name={}", short_url),
     )
         .into_response();
