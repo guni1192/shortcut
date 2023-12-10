@@ -8,9 +8,7 @@
 # Create a stage for building the application.
 
 ARG RUST_VERSION=1.73
-ARG APP_NAME=shortcut-api
 FROM rust:${RUST_VERSION}-slim-bookworm AS build
-ARG APP_NAME
 WORKDIR /app
 
 RUN apt-get update && \
@@ -24,9 +22,8 @@ RUN apt-get update && \
 # Leverage a bind mount to the src directory to avoid having to copy the
 # source code into the container. Once built, copy the executable to an
 # output directory before the cache mounted /app/target is unmounted.
-RUN --mount=type=bind,source=shortcut-api/src,target=shortcut-api/src \
-    --mount=type=bind,source=shortcut-api/Cargo.toml,target=shortcut-api/Cargo.toml \
-    --mount=type=bind,source=shortcut-api/build.rs,target=shortcut-api/build.rs \
+RUN --mount=type=bind,source=shortcut-api/,target=shortcut-api/ \
+    --mount=type=bind,source=shortcut-gateway/,target=shortcut-gateway/ \
     --mount=type=bind,source=Cargo.toml,target=Cargo.toml \
     --mount=type=bind,source=Cargo.lock,target=Cargo.lock \
     --mount=type=bind,source=proto,target=proto \
@@ -36,7 +33,8 @@ RUN --mount=type=bind,source=shortcut-api/src,target=shortcut-api/src \
     <<EOF
 set -e
 cargo build --release
-cp ./target/release/$APP_NAME /bin/server
+cp ./target/release/shortcut-api /bin/shortcut-api
+cp ./target/release/shortcut-gateway /bin/shortcut-gateway
 EOF
 
 
@@ -74,10 +72,11 @@ RUN adduser \
 USER appuser
 
 # Copy the executable from the "build" stage.
-COPY --from=build /bin/server /bin/
+COPY --from=build /bin/shortcut-api /bin/
+COPY --from=build /bin/shortcut-gateway /bin/
 
 # Expose the port that the application listens on.
 EXPOSE 1192
 
 # What the container should run when it is started.
-CMD ["/bin/server"]
+CMD ["/bin/shortcut-api"]
