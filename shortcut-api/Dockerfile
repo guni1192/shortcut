@@ -24,6 +24,7 @@ RUN apt-get update && \
 # output directory before the cache mounted /app/target is unmounted.
 RUN --mount=type=bind,source=shortcut-api/,target=shortcut-api/ \
     --mount=type=bind,source=shortcut-gateway/,target=shortcut-gateway/ \
+    --mount=type=bind,source=scctl/,target=scctl/ \
     --mount=type=bind,source=Cargo.toml,target=Cargo.toml \
     --mount=type=bind,source=Cargo.lock,target=Cargo.lock \
     --mount=type=bind,source=proto,target=proto \
@@ -35,6 +36,7 @@ set -e
 cargo build --release
 cp ./target/release/shortcut-api /bin/shortcut-api
 cp ./target/release/shortcut-gateway /bin/shortcut-gateway
+cp ./target/release/scctl /bin/scctl
 EOF
 
 
@@ -77,6 +79,9 @@ COPY --from=build /bin/shortcut-gateway /bin/
 
 # Expose the port that the application listens on.
 EXPOSE 1192
+
+# for scctl
+ENV SHORTCUT_API_URL="http://localhost:1192"
 
 # What the container should run when it is started.
 CMD ["/bin/shortcut-api"]
