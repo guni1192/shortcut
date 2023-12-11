@@ -123,3 +123,11 @@ jobs:
     - name: Run medium tests
       working-directory: shortcut-api/
       run: cargo test --tests
+
+    # TODO: check redirect locaiton
+    - name: E2E Tests
+      working-directory: scctl/
+      run: |
+        cargo run -- --shortcut-api-url=http://localhost:1192 create --name gh --url https://github.com
+        cargo run -- --shortcut-api-url=http://localhost:1192 get gh
+

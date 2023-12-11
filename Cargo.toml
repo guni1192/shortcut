@@ -3,4 +3,5 @@ resolver = "2"
 members = [
     "shortcut-api",
     "shortcut-gateway",
+    "scctl",
 ]
