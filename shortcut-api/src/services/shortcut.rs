@@ -108,6 +108,28 @@ impl Shortcut for ShortcutService {
         }))
     }
 
+    async fn find_by_name(&self, request: tonic::Request<proto::FindByNameRequest>) -> Result<tonic::Response<proto::FindByNameResponse>, tonic::Status> {
+        let request = request.into_inner();
+
+        let link = self.repository.find_by_name(&request.name).await.map_err(|e| {
+            warn!("failed to find link by name: {:?}", e);
+            tonic::Status::not_found(format!("failed to find link by name: {:?}", e))
+        })?;
+
+        let created_at = to_prost_timestamp(link.created_at);
+        let updated_at = to_prost_timestamp(link.updated_at);
+
+        Ok(tonic::Response::new(proto::FindByNameResponse {
+            link: Some(Link {
+                id: link.id.to_string(),
+                name: link.name,
+                url: link.url,
+                created_at: Some(created_at),
+                updated_at: Some(updated_at),
+            }),
+        }))
+    }
+
     async fn update(
         &self,
         request: tonic::Request<proto::UpdateRequest>,
