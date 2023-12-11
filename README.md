@@ -1,3 +1,8 @@
-# shortcut
+# Shortcut
 
-shortcut is a golink alternative.
+Shortcut is a golink alternative.
+
+
+## Shortcut Overview
+
+![](./docs/arch.png)
