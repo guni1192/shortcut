@@ -19,7 +19,7 @@ pub async fn test_link_create(pool: PgPool) -> Result<(), anyhow::Error> {
 }
 
 #[sqlx::test]
-pub async fn test_get_link_by_name(pool: PgPool) -> Result<(), anyhow::Error> {
+pub async fn test_link_find_by_name(pool: PgPool) -> Result<(), anyhow::Error> {
     let repository = ScLinkRepository::new(pool);
     repository
         .create("guni", "https://guni1192.com")

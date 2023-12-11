@@ -3,7 +3,7 @@ use axum::{
     response::{IntoResponse, Redirect, Response},
 };
 use hyper::StatusCode;
-use shortcut_api::services::shortcut::proto::shortcut_client::ShortcutClient;
+use shortcut_api::services::shortcut::proto::{shortcut_client::ShortcutClient, FindByNameRequest};
 
 #[derive(Clone)]
 pub struct ShortcutClientConfig {
@@ -36,16 +36,40 @@ pub async fn redirect(
             )
                 .into_response()
         })?;
-    let request = tonic::Request::new(shortcut_api::services::shortcut::proto::ListRequest {});
 
-    let response = client.list(request).await.map_err(|e| {
-        tracing::error!("shortcut-api request error: {:?}", e);
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "Internal Server Error: shortcut-api is not available".to_string(),
-        )
-            .into_response()
-    })?;
+    let request = tonic::Request::new(FindByNameRequest {
+        name: short_url.clone(),
+    });
+
+    let response = client
+        .find_by_name(request)
+        .await
+        .map_err(|e| match e.code() {
+            tonic::Code::NotFound => {
+                tracing::warn!("Link not found: name={}, Error={:?}", short_url.clone(), e);
+                (
+                    StatusCode::NOT_FOUND,
+                    format!("Link not found: name={}", short_url),
+                )
+                    .into_response()
+            }
+            tonic::Code::Internal => {
+                tracing::error!("shortcut-api request error: {:?}", e);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Internal Server Error: shortcut-api is not available".to_string(),
+                )
+                    .into_response()
+            }
+            _ => {
+                tracing::error!("unknown shortcut-api request error: {:?}", e);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Internal Server Error".to_string(),
+                )
+                    .into_response()
+            }
+        })?;
     tracing::info!("Response: {:?}", response);
     let response = response.into_inner();
 
@@ -55,9 +79,7 @@ pub async fn redirect(
     )
         .into_response();
 
-    let link = response.links.iter().find(|link| link.name == short_url);
-
-    match link {
+    match response.link {
         Some(link) => Ok(Redirect::permanent(&link.url)),
         None => Err(not_found),
     }
