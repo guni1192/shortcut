@@ -1,7 +1,10 @@
 use prost_types::Timestamp;
 use proto::shortcut_server::Shortcut;
 use proto::Link;
-use sqlx::{types::chrono, Error::Database};
+use sqlx::{
+    types::chrono,
+    Error::{Database, RowNotFound},
+};
 use tracing::{info, warn};
 
 use crate::repositories::links::{LinkRepository, ScLinkRepository};
@@ -43,12 +46,15 @@ impl Shortcut for ShortcutService {
             .await
             .map_err(|e| match e {
                 Database(pg_err) if pg_err.kind() == sqlx::error::ErrorKind::UniqueViolation => {
-                    tonic::Status::already_exists(format!("link name \"{}\" already exists", request.name))
+                    tonic::Status::already_exists(format!(
+                        "link name \"{}\" already exists",
+                        request.name
+                    ))
                 }
                 e => {
                     warn!("failed to create link: {:?}, request: {:?}", e, request);
                     tonic::Status::internal(format!("failed to create link: {:?}", e))
-                },
+                }
             })?;
 
         info!("Shortcut::Create: {:?}", link);
@@ -76,18 +82,21 @@ impl Shortcut for ShortcutService {
             tonic::Status::internal(format!("failed to list links: {:?}", e))
         })?;
 
-        let links: Vec<Link> = links.iter().map(|link| {
-            let created_at = to_prost_timestamp(link.created_at);
-            let updated_at = to_prost_timestamp(link.updated_at);
+        let links: Vec<Link> = links
+            .iter()
+            .map(|link| {
+                let created_at = to_prost_timestamp(link.created_at);
+                let updated_at = to_prost_timestamp(link.updated_at);
 
-            Link {
-                id: link.id.to_string(),
-                name: link.name.clone(),
-                url: link.url.clone(),
-                created_at: Some(created_at),
-                updated_at: Some(updated_at),
-            }
-        }).collect();
+                Link {
+                    id: link.id.to_string(),
+                    name: link.name.clone(),
+                    url: link.url.clone(),
+                    created_at: Some(created_at),
+                    updated_at: Some(updated_at),
+                }
+            })
+            .collect();
 
         Ok(tonic::Response::new(proto::ListResponse { links }))
     }
@@ -108,13 +117,20 @@ impl Shortcut for ShortcutService {
         }))
     }
 
-    async fn find_by_name(&self, request: tonic::Request<proto::FindByNameRequest>) -> Result<tonic::Response<proto::FindByNameResponse>, tonic::Status> {
+    async fn find_by_name(
+        &self,
+        request: tonic::Request<proto::FindByNameRequest>,
+    ) -> Result<tonic::Response<proto::FindByNameResponse>, tonic::Status> {
         let request = request.into_inner();
 
-        let link = self.repository.find_by_name(&request.name).await.map_err(|e| {
-            warn!("failed to find link by name: {:?}", e);
-            tonic::Status::not_found(format!("failed to find link by name: {:?}", e))
-        })?;
+        let link = self
+            .repository
+            .find_by_name(&request.name)
+            .await
+            .map_err(|e| {
+                warn!("failed to find link by name: {:?}", e);
+                tonic::Status::not_found(format!("failed to find link by name: {:?}", e))
+            })?;
 
         let created_at = to_prost_timestamp(link.created_at);
         let updated_at = to_prost_timestamp(link.updated_at);
@@ -149,9 +165,23 @@ impl Shortcut for ShortcutService {
 
     async fn delete(
         &self,
-        _request: tonic::Request<proto::DeleteRequest>,
+        request: tonic::Request<proto::DeleteRequest>,
     ) -> Result<tonic::Response<proto::DeleteResponse>, tonic::Status> {
-        // let request = request.into_inner();
+        let request = request.into_inner();
+        self.repository
+            .delete(&request.name)
+            .await
+            .map_err(|e| match e {
+                RowNotFound => {
+                    warn!("link name \"{}\" is not found: Error={:?}", request.name, e);
+                    tonic::Status::not_found(format!("link name \"{}\" not found", request.name))
+                }
+                _ => { 
+                    warn!("failed to delete link \"{}\" : Error={:?}", request.name, e);
+                    tonic::Status::internal(format!("failed to delete link \"{}\": {:?}", request.name, e)) 
+                },
+            })?;
+
         Ok(tonic::Response::new(proto::DeleteResponse {}))
     }
 }

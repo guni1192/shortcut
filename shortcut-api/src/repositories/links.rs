@@ -21,6 +21,7 @@ pub trait LinkRepository {
     async fn find_by_name(&self, name: &str) -> Result<Link, sqlx::Error>;
     async fn list(&self) -> Result<Vec<Link>, sqlx::Error>;
     async fn create(&self, name: &str, url: &str) -> Result<Link, sqlx::Error>;
+    async fn delete(&self, name: &str) -> Result<(), sqlx::Error>;
 }
 
 #[derive(Debug)]
@@ -49,6 +50,11 @@ impl LinkRepository for ScLinkRepository {
     async fn create(&self, name: &str, url: &str) -> Result<Link, sqlx::Error> {
         let link = InternalLinkRepository::create(name, url, &self.pool).await?;
         Ok(link)
+    }
+
+    async fn delete(&self, name: &str) -> Result<(), sqlx::Error> {
+        InternalLinkRepository::delete(name, &self.pool).await?;
+        Ok(())
     }
 }
 
@@ -97,5 +103,16 @@ impl InternalLinkRepository {
             .await?;
 
         Ok(link)
+    }
+
+    pub async fn delete<'a, A>(name: &str, conn: A) -> Result<(), sqlx::Error>
+    where
+        A: Acquire<'a, Database = Postgres> + 'a,
+    {
+        let mut conn = conn.acquire().await?;
+        sqlx::query_as!(Link, "DELETE FROM links WHERE name = $1", name)
+            .execute(&mut *conn)
+            .await?;
+        Ok(())
     }
 }
