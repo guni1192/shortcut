@@ -1,5 +1,5 @@
 use shortcut_api::services::shortcut::proto::{
-    shortcut_client::ShortcutClient, CreateRequest, ListRequest, FindByNameRequest,
+    shortcut_client::ShortcutClient, CreateRequest, DeleteResponse, FindByNameRequest, ListRequest, DeleteRequest,
 };
 
 #[tokio::test]
@@ -33,7 +33,6 @@ async fn test_shortcut_create() -> Result<(), Box<dyn std::error::Error>> {
 
     assert_eq!(err.code(), tonic::Code::AlreadyExists);
 
-
     Ok(())
 }
 
@@ -48,7 +47,6 @@ async fn test_shortcut_list() -> Result<(), Box<dyn std::error::Error>> {
         name: name.clone(),
     });
     client.create(request).await?;
-
 
     let request = tonic::Request::new(ListRequest {});
 
@@ -72,7 +70,7 @@ async fn test_shortcut_find_by_name() -> Result<(), Box<dyn std::error::Error>> 
     });
     client.create(request).await?;
 
-    let request = tonic::Request::new(FindByNameRequest{ name: name.clone() });
+    let request = tonic::Request::new(FindByNameRequest { name: name.clone() });
 
     let response = client.find_by_name(request).await?;
     let response = response.into_inner();
@@ -84,6 +82,32 @@ async fn test_shortcut_find_by_name() -> Result<(), Box<dyn std::error::Error>> 
     assert_eq!(link.name, name);
     assert!(link.created_at.is_some());
     assert!(link.updated_at.is_some());
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_shortcut_delete() -> Result<(), Box<dyn std::error::Error>> {
+    let mut client = ShortcutClient::connect("http://localhost:1192").await?;
+
+    // Prepare data
+    let name: String = uuid::Uuid::new_v4().to_string();
+    let request = tonic::Request::new(CreateRequest {
+        url: "https://guni1192.com".into(),
+        name: name.clone(),
+    });
+    client.create(request).await?;
+
+    let request = tonic::Request::new(DeleteRequest{ name: name.clone() });
+    let response = client.delete(request).await?;
+    let response = response.into_inner();
+
+    assert_eq!(response, DeleteResponse {});
+
+    let request = tonic::Request::new(FindByNameRequest { name: name.clone() });
+    let err = client.find_by_name(request).await.unwrap_err();
+
+    assert_eq!(err.code(), tonic::Code::NotFound);
 
     Ok(())
 }

@@ -8,9 +8,7 @@ lazy_static::lazy_static! {
 #[sqlx::test]
 pub async fn test_link_create(pool: PgPool) -> Result<(), anyhow::Error> {
     let repository = ScLinkRepository::new(pool);
-    let link = repository.create("guni", "https://guni1192.com").await?;
-
-    dbg!(&link);
+    let link: Link = repository.create("guni", "https://guni1192.com").await?;
 
     assert_eq!(link.name, "guni".to_string());
     assert_eq!(link.url, "https://guni1192.com".to_string());
@@ -34,6 +32,22 @@ pub async fn test_link_find_by_name(pool: PgPool) -> Result<(), anyhow::Error> {
 }
 
 #[sqlx::test]
+pub async fn test_link_find_by_name_not_found(pool: PgPool) -> Result<(), anyhow::Error> {
+    let repository = ScLinkRepository::new(pool);
+
+    let err = repository
+        .find_by_name("unknown_link_data")
+        .await
+        .unwrap_err();
+
+    match err {
+        sqlx::Error::RowNotFound => {}
+        _ => panic!("unexpected error: {:?}", err),
+    }
+    Ok(())
+}
+
+#[sqlx::test]
 pub async fn test_link_list(pool: PgPool) -> Result<(), anyhow::Error> {
     let repository = ScLinkRepository::new(pool);
     repository
@@ -48,13 +62,16 @@ pub async fn test_link_list(pool: PgPool) -> Result<(), anyhow::Error> {
 }
 
 #[sqlx::test]
-pub async fn test_get_link_by_name_not_found(pool: PgPool) -> Result<(), anyhow::Error> {
+pub async fn test_link_delete(pool: PgPool) -> Result<(), anyhow::Error> {
     let repository = ScLinkRepository::new(pool);
-
-    let err = repository
-        .find_by_name("unknown_link_data")
+    repository
+        .create("guni", "https://guni1192.com")
         .await
-        .unwrap_err();
+        .expect("failed to create link");
+
+    repository.delete("guni").await?;
+
+    let err = repository.find_by_name("guni").await.unwrap_err();
 
     match err {
         sqlx::Error::RowNotFound => {}
